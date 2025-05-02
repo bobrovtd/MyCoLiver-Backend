@@ -1,46 +1,63 @@
 from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi import Depends, FastAPI
+from app.core.config import settings
+from app.core.logger import configure_logging, get_logger
+from app.database.config import create_db_and_tables
+from app.routers import api_router
 
-from app.db import User, create_db_and_tables
-from app.schemas import UserCreate, UserRead, UserUpdate
-from app.users import auth_backend, current_active_user, fastapi_users
+# Configure logging
+configure_logging()
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Not needed if you setup a migration system like Alembic
-    await create_db_and_tables()
+    # Create database tables on startup if not using migrations
+    if settings.DEBUG:
+        logger.info("Running in DEBUG mode. Creating database tables...")
+        await create_db_and_tables()
+        logger.info("Database tables created successfully")
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+def create_application() -> FastAPI:
+    """
+    Factory function to create the FastAPI application
+    """
+    application = FastAPI(
+        lifespan=lifespan,
+        title=settings.PROJECT_NAME,
+        description=settings.DESCRIPTION,
+        version=settings.VERSION,
+        openapi_url=f"{settings.API_V1_STR}/openapi.json",
+        docs_url="/docs",
+        redoc_url="/redoc",
+    )
 
-app.include_router(
-    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
-)
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_reset_password_router(),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_verify_router(UserRead),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
-    tags=["users"],
-)
+    # Set CORS middleware
+    if settings.BACKEND_CORS_ORIGINS:
+        application.add_middleware(
+            CORSMiddleware,
+            allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
+    # Include API router
+    application.include_router(api_router, prefix=settings.API_V1_STR)
+
+    # Root endpoint
+    @application.get("/", tags=["Status"])
+    async def root():
+        return {
+            "status": "online",
+            "message": f"Welcome to the {settings.PROJECT_NAME}. Visit /docs for API documentation.",
+        }
+
+    return application
 
 
-@app.get("/authenticated-route")
-async def authenticated_route(user: User = Depends(current_active_user)):
-    return {"message": f"Hello {user.email}!"}
+app = create_application()

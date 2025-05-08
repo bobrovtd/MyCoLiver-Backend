@@ -1,9 +1,7 @@
 from fastapi import APIRouter
 
-from app.routers import auth, users
+# This file makes the directory a Python package
+from app.routers import profiles
 
-api_router = APIRouter()
-
-# Include routers from modules
-api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
-api_router.include_router(users.router, prefix="/users", tags=["users"])
+# The auth and users routers are handled directly by FastAPI Users
+# in the main.py file, so we don't need to include them here

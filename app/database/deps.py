@@ -1,7 +1,8 @@
 from collections.abc import AsyncGenerator
+
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.config import async_session_maker
 from app.models.users import User

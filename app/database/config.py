@@ -1,4 +1,6 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+import os
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
 from app.core.config import settings
 
 # Create the async engine
@@ -13,6 +15,18 @@ engine = create_async_engine(
 )
 
 # Create the async session factory
+async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
+# Configure the database URL
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
+
+# Create the async engine with proper connection parameters
+engine = create_async_engine(
+    DATABASE_URL,
+    connect_args=(
+        {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+    ),
+)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 

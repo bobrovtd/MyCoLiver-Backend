@@ -9,10 +9,11 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users import models
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.database.deps import get_user_db
-from app.models.users import User
+from app.database.deps import get_user_db, get_async_session
+from app.models.users import User, UserProfile
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
@@ -21,6 +22,12 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")  # Replace with proper logging
+
+        # Create empty profile for the new user
+        async for session in get_async_session():
+            profile = UserProfile(user_id=user.id)
+            session.add(profile)
+            await session.commit()
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None

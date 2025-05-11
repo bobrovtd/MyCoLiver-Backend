@@ -1,10 +1,12 @@
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 
 from app.auth.users import auth_backend, fastapi_users
 from app.core.config import settings
 from app.schemas.users import UserCreate, UserRead, UserUpdate
-from app.routers import profiles
+from app.routers import profiles, ads
 from app.db import create_db_and_tables
 
 app = FastAPI(
@@ -62,7 +64,17 @@ app.include_router(
     tags=["profiles"],
 )
 
+# Ads routes
+app.include_router(
+    ads.router,
+    prefix=f"{settings.API_V1_STR}/ads",
+    tags=["ads"],
+)
 
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
+# Указываем директорию для хранения HTML-шаблонов
+templates = Jinja2Templates(directory="templates")
+
+
+@app.get("/", response_class=HTMLResponse)
+def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})

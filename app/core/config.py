@@ -1,8 +1,8 @@
 import os
 import secrets
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
-from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, validator
+from pydantic import AnyHttpUrl, EmailStr, validator
 from pydantic_settings import BaseSettings
 
 

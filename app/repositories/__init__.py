@@ -1,3 +1,4 @@
-from app.repositories.profile import ProfileRepository
+from app.repositories.profile import UserProfileRepository
+from app.repositories.ad import AdRepository
 
-__all__ = ["ProfileRepository"]
+__all__ = ["UserProfileRepository", "AdRepository"]

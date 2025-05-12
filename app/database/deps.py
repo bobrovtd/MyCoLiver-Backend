@@ -21,3 +21,4 @@ async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     Dependency that yields an SQLAlchemy user database
     """
     yield SQLAlchemyUserDatabase(session, User)
+

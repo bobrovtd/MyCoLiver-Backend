@@ -12,7 +12,7 @@ from fastapi_users import models
 
 from app.core.config import settings
 from app.database.deps import get_user_db, get_async_session
-from app.models.users import User, UserProfile
+from app.models import User, UserProfile
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):

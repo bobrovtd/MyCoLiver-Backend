@@ -22,7 +22,9 @@ async def lifespan(app: FastAPI):
     Lifespan context manager to handle setup and cleanup tasks at application lifecycle boundaries.
     """
     if settings.DEBUG:
-        logger.info("Application startup: Running in DEBUG mode. Creating database tables...")
+        logger.info(
+            "Application startup: Running in DEBUG mode. Creating database tables..."
+        )
         await create_db_and_tables()
         logger.info("Database tables created successfully")
     yield  # Application runs here
@@ -112,5 +114,5 @@ if __name__ == "__main__":
         # host=settings.HOST,
         # port=settings.PORT,
         log_level=settings.LOG_LEVEL.lower(),
-        reload=settings.DEBUG
+        reload=settings.DEBUG,
     )

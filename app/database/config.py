@@ -11,9 +11,7 @@ engine = create_async_engine(
     DATABASE_URL,
     echo=settings.DEBUG,
     connect_args=(
-        {"check_same_thread": False}
-        if DATABASE_URL.startswith("sqlite")
-        else {}
+        {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
     ),
 )
 

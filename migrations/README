@@ -1,3 +1,0 @@
-Generic single-database configuration with Alembic.
-
-This is used for database migrations.
